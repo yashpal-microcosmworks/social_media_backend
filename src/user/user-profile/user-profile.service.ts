@@ -16,8 +16,6 @@ export class UserProfileService {
 
       if (user) {
         return user;
-      } else {
-        throw new BadRequestException('Please login to access this route !!');
       }
     } catch (error) {
       this.logger.error(error);

@@ -21,7 +21,6 @@ export class UserService {
   async register(dto: UserReqDto): Promise<CredentialsRegisterResDTO> {
     try {
       const email = dto.email;
-
       const user = await this.userRepo.findOne({
         where: { email: email, isDeleted: false },
       });
@@ -37,9 +36,8 @@ export class UserService {
       }
 
       let entity: UserEntity = UserReqDto.transformToEntity(dto);
-
       entity = await this.userRepo.save(entity);
-
+      console.log(entity);
       await this.otpService.sendVerificationEmail(entity.email);
 
       return {

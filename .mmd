@@ -1,0 +1,94 @@
+//////////////////////////////////////////////////////////////
+registeration -> verification -> homepage
+//////////////////////////////////////////////////////////////  
+graph TD;
+  A[Start] --> B[Receive Registration Request]
+  B --> C[Check If Email Exists]
+  C -- Yes --> E[Check If Account Is Verified]
+  E -- Yes --> F[Throw BadRequestException: 'Account with this email already exists.']
+  E -- No --> G[Resend OTP for Verification]
+  G --> H[Find Existing OTP]
+  H -- Exists and Valid --> I[Mark Old OTP as Deleted]
+  I --> J[Save Deleted OTP Status]
+  J --> K[Send New Verification OTP]
+  K --> L[Generate OTP and Store in Database]
+  L --> N[Send OTP Email via Nodemailer]
+  N --> O[Return: 'Verification OTP re-sent successfully!']
+  H -- Not Exists or Expired --> K
+  C -- No --> Q[Save User to Database]
+  Q --> R[Generate OTP and Store in Database]
+  R --> U[Return: 'Registered Successfully']
+
+  %% --- ACCOUNT VERIFICATION FLOW ---
+  U --> V[Receive Verify Account Request]
+  V --> Y[Check If Account Is Already Verified]
+  Y -- Yes --> Z[Throw BadRequestException: 'This account is already verified.']
+  Y -- No --> AA[Find OTP in Database]
+  AA -- OTP Exists, Valid, and Not Expired --> AB[Mark OTP as Deleted]
+  AB --> AC[Update User as Verified]
+  AC --> AD[Save User First Name, Last Name, and Password]
+  AD --> AE[Hash and Save User Password]
+  AE --> AF[Assign USER Role]
+  AF --> AG[Save User]
+  AG --> AH[Generate JWT Token]
+  AH --> AI[Prepare User Profile Response]
+  AI --> AJ[Return: 'Account verification is successful', Token Sent]
+  AJ --> AK[Redirect to Home Page]
+
+  Z --> AT[Log Error]
+  AT --> AU[Throw Error]
+  AU --> AV[End]
+  O --> AV
+
+//////////////////////////////////////////////////////////////////////////////
+LOGIN
+//////////////////////////////////////////////////////////////////////////////
+graph TD;
+  A[Start] --> B[Receive Login Request]
+  B --> C[Validate User by Email]
+  C -- User Not Found --> D[Throw NotFoundException: Account doesn't exist. Sign up!]
+  C -- User Found --> E[Check If Account Is Verified]
+  E -- No --> F[Throw UnauthorizedException: Account not verified. Check email!]
+  E -- Yes --> G[Check If Account Is Active]
+  G -- No --> H[Throw UnauthorizedException: Account inactive. Contact support!]
+  G -- Yes --> I[Check If Account Created with Google]
+  I -- Yes --> J[Throw UnauthorizedException: Sign in using Google!]
+  I -- No --> K[Verify Password]
+  K -- Incorrect --> L[Throw UnauthorizedException: Incorrect email or password!]
+  K -- Correct --> M[Generate JWT Access Token]
+  M --> N[Store Token in Database]
+  N --> O[Prepare Login Response with Attached JWT Token]
+  O --> P[Return: You have logged in successfully!]
+  P --> Q[End]
+  
+  %% Handle Errors
+  D --> Q
+  F --> Q
+  H --> Q
+  J --> Q
+  L --> Q
+
+//////////////////////////////////////////////////////////////////////////////
+LOGOUT
+//////////////////////////////////////////////////////////////////////////////
+
+graph TD;
+  A[Start] --> B[Receive Logout Request]
+  B --> C[Extract Authorization Header]
+  C -- Missing Header --> D[Throw HttpException: Access Token Missing]
+  C -- Found --> E[Extract Token from Header]
+  E --> F[Find Token in Database]
+  F -- Not Found --> G[Throw HttpException: Token Not Found. Please Log In Again.]
+  F -- Found --> H[Set Token Expiry to Now]
+  H --> I[Set isActive to False]
+  I --> J[Save Token Update to Database]
+  J --> K[Return: You have logged out successfully!]
+  K --> L[End]
+  
+  %% Handle Errors
+  D --> L
+  G --> L
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////

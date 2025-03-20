@@ -9,7 +9,6 @@ import { PermissionEntity } from './permission.entity';
 
 export enum ROLE_VALUES {
   ADMIN = 'ROLE_ADMIN',
-  HR = 'ROLE_HR',
   USER = 'ROLE_USER',
 }
 

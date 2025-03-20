@@ -27,9 +27,7 @@ export class AuthGuard implements CanActivate {
       'authority',
       context.getHandler(),
     );
-
     const authorityList = Array.isArray(authority) ? authority : [authority];
-
     const request = context.switchToHttp().getRequest();
     const authHeader = request.get('Authorization');
     const authorization = authHeader ? authHeader.split(' ')[1] : null;
@@ -41,13 +39,7 @@ export class AuthGuard implements CanActivate {
     try {
       const accessToken = await this.accessTokenRepo.findOne({
         where: { accessToken: authorization },
-        relations: [
-          'user',
-          'user.enterprise',
-          'user.roles.permissions',
-          'user.selectedQuestTypes',
-          'user.department',
-        ],
+        relations: ['user', 'user.roles.permissions'],
       });
 
       if (!accessToken || accessToken.isDeleted) {

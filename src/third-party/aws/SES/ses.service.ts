@@ -8,7 +8,7 @@ export class SesService {
 
   constructor(private configService: ConfigService) {
     this.sesClient = new SESClient({
-      region: this.configService.get<string>('AWS_REGION'),
+      region: this.configService.get<string>('AWS_SES_REGION'),
       credentials: {
         accessKeyId: this.configService.get<string>('AWS_SES_ACCESS_KEY_ID'),
         secretAccessKey: this.configService.get<string>(

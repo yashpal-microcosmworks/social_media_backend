@@ -2,8 +2,8 @@ import {
   IsBoolean,
   IsDate,
   IsNotEmpty,
-  IsEnum,
   IsEmail,
+  IsEnum,
 } from 'class-validator';
 import {
   Column,
@@ -11,6 +11,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Type } from 'class-transformer';
 
 export enum OTPEnum {
   VERIFICATION = 'verification',
@@ -35,14 +36,15 @@ export class OTPEntity {
   @Column({ type: 'enum', enum: OTPEnum })
   otp_type: OTPEnum;
 
-  @IsDate()
   @Column({ type: 'timestamp' })
+  @IsDate()
+  @Type(() => Date)
   expiry: Date;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @IsBoolean()
   @Column({ default: false })
+  @IsBoolean()
   isDeleted: boolean;
 }

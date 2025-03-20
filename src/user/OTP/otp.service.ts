@@ -53,7 +53,6 @@ export class OTPService {
   async generateOTP(email: string, otp_type: OTPEnum): Promise<OTPEntity> {
     const verification_otp: OTPEntity = new OTPEntity();
     verification_otp.OTP = this.generateOTPFromUUID();
-
     const expiryInMs = Number(process.env.OTP_EXPIRY) || 3600 * 1000;
 
     verification_otp.expiry = new Date(Date.now() + expiryInMs);
@@ -103,7 +102,6 @@ export class OTPService {
     // verify user 1st
     let existingUser = await this.userRepo.findOne({
       where: { email: email, isDeleted: false },
-      relations: ['enterprise'],
     });
 
     if (!existingUser) {

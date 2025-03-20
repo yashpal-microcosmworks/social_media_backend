@@ -17,10 +17,10 @@ import {
   UserEntity,
   AccessTokenEntity,
 } from './models/user-entity';
-import { GoogleAuthModule } from './user/google-oauth-2/google-auth.module';
 import { ThirdPartyModule } from './third-party/third-party.module';
 import { MulterModule } from '@nestjs/platform-express';
-
+import { PostModule } from './models/post/posts/posts.module';
+import { PostLikeModule } from './models/post/postLikes/postLikes.module';
 @Module({
   imports: [
     NestConfigModule.forRoot({
@@ -40,11 +40,12 @@ import { MulterModule } from '@nestjs/platform-express';
     LoggerModule,
     FilterModule,
     ConfigModule,
-    GoogleAuthModule,
     JwtModule.register({}),
     MulterModule.register(),
     CommonModule,
     ThirdPartyModule,
+    PostModule,
+    PostLikeModule,
   ],
   controllers: [],
   providers: [BootstrapService],

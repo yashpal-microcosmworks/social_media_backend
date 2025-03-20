@@ -141,12 +141,6 @@ export class SecurityService {
     return { token: jwtAccessToken, expiryInMs };
   }
 
-  private extractPermissions(user: UserEntity): string[] {
-    return user.roles.flatMap((role) =>
-      role.permissions.map((permission) => permission.value),
-    );
-  }
-
   private sendLoginResponse(
     user: UserEntity,
     token: string,
