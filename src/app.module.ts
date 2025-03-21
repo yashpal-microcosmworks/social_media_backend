@@ -19,8 +19,9 @@ import {
 } from './models/user-entity';
 import { ThirdPartyModule } from './third-party/third-party.module';
 import { MulterModule } from '@nestjs/platform-express';
-import { PostModule } from './models/post/posts/posts.module';
-import { PostLikeModule } from './models/post/postLikes/postLikes.module';
+import { PostModule } from './post/posts/posts.module';
+import { PostLikeModule } from './post/postLikes/postLikes.module';
+import { FriendRequestModule } from './friend-request/friend-request.module';
 @Module({
   imports: [
     NestConfigModule.forRoot({
@@ -46,6 +47,7 @@ import { PostLikeModule } from './models/post/postLikes/postLikes.module';
     ThirdPartyModule,
     PostModule,
     PostLikeModule,
+    FriendRequestModule,
   ],
   controllers: [],
   providers: [BootstrapService],

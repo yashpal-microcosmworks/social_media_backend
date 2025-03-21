@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { PostLikesService } from './postLikes.service';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { AuthGuard } from '../../../security/middleware/authGuard.middleware';
+import { AuthGuard } from '../../security/middleware/authGuard.middleware';
 
 @ApiTags('Post Likes')
 @ApiBearerAuth()

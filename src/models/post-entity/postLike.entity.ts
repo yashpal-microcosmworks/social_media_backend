@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { PostEntity } from './post.entity';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../user-entity/user.entity';
 
 @Entity('postLike')
 export class PostLikeEntity {

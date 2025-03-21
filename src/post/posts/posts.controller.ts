@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { PostService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
-import { AuthGuard } from '../../../security/middleware/authGuard.middleware';
+import { AuthGuard } from '../../security/middleware/authGuard.middleware';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -19,11 +19,9 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
-import { ErrorResponse } from 'src/common/responses/errorResponse';
 import { PostResponseDto } from './dto/PostResponse.dto';
 import { UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import multer from 'multer';
 import { getMulterMediaOptions } from 'src/utils/multer.utils';
 import { AllowedMixEntensions } from 'src/utils/allowedExtensions.utils';
 
@@ -50,7 +48,6 @@ export class PostController {
     @Body('content') content: string,
     @Request() req: any,
   ) {
-    console.log(files);
     if (!files) {
       throw new Error('No file uploaded');
     }
@@ -93,7 +90,7 @@ export class PostController {
   }
 
   @Delete(':id')
-  async deletePost(@Param('id') id: number) {
-    return this.postService.deletePost(id);
+  async deletePost(@Param('id') id: number, @Request() req: any) {
+    return this.postService.deletePost(id, req.user);
   }
 }

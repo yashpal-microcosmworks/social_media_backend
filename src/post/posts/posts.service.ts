@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PostEntity } from '../../user-entity/post.entity';
-import { PostMediaEntity } from '../../user-entity/postMedia.entity';
-import { CreatePostDto } from './dto/create-post.dto';
+import { PostEntity } from '../../models/post-entity/post.entity';
+import { PostMediaEntity } from '../../models/post-entity/postMedia.entity';
+import { PostLikeEntity } from '../../models/post-entity/postLike.entity';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { S3Service } from 'src/third-party/aws/S3_bucket/s3.service';
 
@@ -15,6 +15,8 @@ export class PostService {
     private readonly postRepository: Repository<PostEntity>,
     @InjectRepository(PostMediaEntity)
     private readonly postMediaRepository: Repository<PostMediaEntity>,
+    @InjectRepository(PostLikeEntity)
+    private readonly postLikeRepository: Repository<PostLikeEntity>,
   ) {}
 
   private formatPostResponse(post: any) {
@@ -85,6 +87,10 @@ export class PostService {
       relations: ['media', 'reactions'],
     });
 
+    // if (posts.length === 0) {
+    //   throw new NotFoundException('No posts available');
+    // }
+
     return posts.map((post) => this.formatPostResponse(post));
   }
 
@@ -93,7 +99,7 @@ export class PostService {
       where: { id, is_deleted: false },
       relations: ['media', 'reactions'],
     });
-    console.log(post);
+
     if (!post) {
       throw new NotFoundException(`Post not found`);
     }
@@ -175,14 +181,20 @@ export class PostService {
     };
   }
 
-  async deletePost(id: number): Promise<{ message: string }> {
+  async deletePost(id: number, user: any): Promise<{ message: string }> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['media'],
+      relations: ['user', 'media', 'reactions'],
     });
 
     if (!post || post.is_deleted) {
       throw new NotFoundException('Post not found');
+    }
+
+    if (post.user.id !== user.id) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this post',
+      );
     }
 
     post.is_deleted = true; // Mark as deleted
@@ -195,6 +207,10 @@ export class PostService {
           await this.postMediaRepository.save(media);
         }),
       );
+      post.reactions.map(async (reaction) => {
+        reaction.isDeleted = true;
+        await this.postLikeRepository.save(reaction);
+      });
     }
 
     return { message: 'Post deleted successfully' };

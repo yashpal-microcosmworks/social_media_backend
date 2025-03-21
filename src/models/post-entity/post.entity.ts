@@ -6,7 +6,7 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { UserEntity } from '../user-entity/user.entity';
 import { PostMediaEntity } from './postMedia.entity';
 import { PostLikeEntity } from './postLike.entity';
 
@@ -26,6 +26,9 @@ export class PostEntity {
 
   @Column({ type: 'text', nullable: true })
   content: string;
+
+  @Column({ default: 0 })
+  totalReactions: number;
 
   @Column({ default: false })
   is_deleted: boolean;

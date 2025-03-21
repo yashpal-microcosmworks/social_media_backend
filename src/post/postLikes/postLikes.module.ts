@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostLikeEntity } from '../../user-entity/postLike.entity';
+import { PostLikeEntity } from '../../models/post-entity/postLike.entity';
 import { PostLikesService } from './postLikes.service';
 import { PostLikesController } from './postLikes.controller';
-import { PostEntity } from '../../user-entity/post.entity';
-import { UserEntity } from '../../user-entity/user.entity';
-import { AccessTokenEntity } from '../../user-entity/accessToken.entity';
-import { LoggerModule } from '../../../common/logger/logger.module';
+import { PostEntity } from '../../models/post-entity/post.entity';
+import { UserEntity } from '../../models/user-entity/user.entity';
+import { AccessTokenEntity } from '../../models/user-entity/accessToken.entity';
+import { LoggerModule } from '../../common/logger/logger.module';
 
 @Module({
   imports: [
