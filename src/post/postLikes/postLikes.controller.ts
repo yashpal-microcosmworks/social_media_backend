@@ -25,12 +25,10 @@ export class PostLikesController {
     reactionType: 'like' | 'love' | 'haha' | 'sad' | 'angry',
     @Request() req: any,
   ) {
-    return this.postLikesService.addReaction(req.user.id, postId, reactionType);
-  }
-
-  @Delete(':postId')
-  async removeReaction(@Param('postId') postId: number, @Request() req: any) {
-    console.log(req.user.id, postId);
-    return this.postLikesService.removeReaction(req.user.id, postId);
+    return this.postLikesService.toggleReaction(
+      req.user.id,
+      postId,
+      reactionType,
+    );
   }
 }

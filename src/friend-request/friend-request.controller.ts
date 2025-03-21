@@ -23,7 +23,10 @@ export class FriendRequestController {
     @Param('receiverId', ParseIntPipe) receiverId: number,
   ) {
     const senderId = req.user.id;
-    return this.friendRequestService.sendFriendRequest(senderId, receiverId);
+    return this.friendRequestService.sendOrCancelFriendRequest(
+      senderId,
+      receiverId,
+    );
   }
 
   // Accept Friend Request
@@ -39,20 +42,15 @@ export class FriendRequestController {
     return this.friendRequestService.rejectFriendRequest(requestId);
   }
 
-  @Patch('cancel/:requestId')
-  cancelFriendRequest(@Param('requestId') requestId: number) {
-    return this.friendRequestService.cancelFriendRequest(requestId);
-  }
-
   @Get('list')
   async getFriendsList(@Request() req: any) {
     const userId = req.user.id;
     return await this.friendRequestService.getFriendsList(userId);
   }
 
-  @Patch('remove/:requestId')
-  removeFriend(@Param('requestId') requestId: number, @Request() req: any) {
+  @Patch('remove/:friendId')
+  removeFriend(@Param('friendId') friendId: number, @Request() req: any) {
     const userId = req.user.id;
-    return this.friendRequestService.removeFriend(userId, requestId);
+    return this.friendRequestService.removeFriend(userId, friendId);
   }
 }

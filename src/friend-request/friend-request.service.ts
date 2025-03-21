@@ -21,7 +21,7 @@ export class FriendRequestService {
   ) {}
 
   //Send a Friend Request
-  async sendFriendRequest(senderId: number, receiverId: number) {
+  async sendOrCancelFriendRequest(senderId: number, receiverId: number) {
     const sender = await this.usersRepository.findOne({
       where: { id: senderId },
     });
@@ -35,21 +35,44 @@ export class FriendRequestService {
       throw new Error('You cannot send a friend request to yourself');
     }
 
-    const existingRequest = await this.friendRequestRepository.findOne({
+    let friendRequest = await this.friendRequestRepository.findOne({
       where: {
         sender: { id: senderId },
         receiver: { id: receiverId },
-        isDeleted: false,
       },
     });
 
-    if (existingRequest) throw new Error('Friend request already sent');
+    if (friendRequest) {
+      if (
+        friendRequest.status === FriendStatus.ACCEPTED &&
+        friendRequest.isDeleted
+      ) {
+        friendRequest.isDeleted = false;
+        friendRequest.status = FriendStatus.PENDING;
+        await this.friendRequestRepository.save(friendRequest);
+      } else if (friendRequest.status === FriendStatus.PENDING) {
+        friendRequest.isDeleted = true;
+        friendRequest.status = FriendStatus.CANCELED;
+        await this.friendRequestRepository.save(friendRequest);
 
-    const friendRequest = this.friendRequestRepository.create({
-      sender,
-      receiver,
-      status: FriendStatus.PENDING,
-    });
+        return {
+          message: 'Friend request canceled successfully',
+        };
+      }
+
+      friendRequest.status = FriendStatus.PENDING;
+      friendRequest.isDeleted = false;
+      friendRequest.createdAt = new Date();
+    } else {
+      // If no previous request, create a new one
+      friendRequest = this.friendRequestRepository.create({
+        sender,
+        receiver,
+        status: FriendStatus.PENDING,
+        isDeleted: false,
+        createdAt: new Date(),
+      });
+    }
 
     const savedRequest = await this.friendRequestRepository.save(friendRequest);
 
@@ -70,8 +93,6 @@ export class FriendRequestService {
       },
     };
   }
-
-  // Accept a Friend Request
   async acceptFriendRequest(
     requestId: number,
   ): Promise<{ message: string; friendship: any }> {
@@ -82,31 +103,50 @@ export class FriendRequestService {
 
     if (!friendRequest) throw new Error('Friend request not found');
 
+    // Mark request as accepted and deleted
     friendRequest.status = FriendStatus.ACCEPTED;
     friendRequest.isDeleted = true;
     await this.friendRequestRepository.save(friendRequest);
 
-    // Add an entry in FriendListEntity
-    const friendEntry = this.friendListRepository.create({
-      sender: friendRequest.sender,
-      receiver: friendRequest.receiver,
+    const senderId = friendRequest.sender.id;
+    const receiverId = friendRequest.receiver.id;
+
+    // Check if friendship already exists
+    let friendship = await this.friendListRepository.findOne({
+      where: [
+        { sender: { id: senderId }, receiver: { id: receiverId } },
+        { sender: { id: receiverId }, receiver: { id: senderId } },
+      ],
+      relations: ['sender', 'receiver'],
     });
 
-    const savedFriendEntry = await this.friendListRepository.save(friendEntry);
+    if (friendship) {
+      // Update existing friendship if needed
+      friendship.isDeleted = false;
+      await this.friendListRepository.save(friendship);
+    } else {
+      // Create new friendship if none exists
+      friendship = this.friendListRepository.create({
+        sender: friendRequest.sender,
+        receiver: friendRequest.receiver,
+      });
+
+      friendship = await this.friendListRepository.save(friendship);
+    }
 
     return {
-      message: 'Friend request accepted and friendship added successfully',
+      message: 'Friend request accepted successfully',
       friendship: {
-        id: savedFriendEntry.id,
+        id: friendship.id,
         user1: {
-          id: friendRequest.sender.id,
-          name: `${friendRequest.sender.firstName} ${friendRequest.sender.lastName}`,
+          id: friendship.sender.id,
+          name: `${friendship.sender.firstName} ${friendship.sender.lastName}`,
         },
         user2: {
-          id: friendRequest.receiver.id,
-          name: `${friendRequest.receiver.firstName} ${friendRequest.receiver.lastName}`,
+          id: friendship.receiver.id,
+          name: `${friendship.receiver.firstName} ${friendship.receiver.lastName}`,
         },
-        createdAt: savedFriendEntry.createdAt,
+        createdAt: friendship.createdAt,
       },
     };
   }
@@ -124,21 +164,6 @@ export class FriendRequestService {
     return this.friendRequestRepository.save(friendRequest);
   }
 
-  async cancelFriendRequest(requestId: number): Promise<{ message: string }> {
-    const friendRequest = await this.friendRequestRepository.findOne({
-      where: { id: requestId, status: FriendStatus.PENDING },
-    });
-
-    if (!friendRequest)
-      throw new Error('Friend request not found or already processed');
-
-    friendRequest.isDeleted = true;
-    friendRequest.status = FriendStatus.CANCELED;
-    await this.friendRequestRepository.save(friendRequest);
-
-    return { message: 'Friend request canceled successfully' };
-  }
-
   async getFriendsList(
     userId: number,
   ): Promise<{ message: string; friends: any[] }> {
@@ -148,7 +173,7 @@ export class FriendRequestService {
         { receiver: { id: userId }, isDeleted: false },
       ],
 
-      relations: ['user1', 'user2'],
+      relations: ['sender', 'receiver'],
     });
 
     if (!friends.length) {
@@ -161,7 +186,7 @@ export class FriendRequestService {
       return {
         id: friendUser.id,
         name: `${friendUser.firstName} ${friendUser.lastName}`,
-        joinedAt: friend.createdAt,
+        friendshipSince: friend.createdAt,
       };
     });
 
