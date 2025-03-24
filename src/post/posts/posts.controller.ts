@@ -10,15 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PostService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
 import { AuthGuard } from '../../security/middleware/authGuard.middleware';
-import {
-  ApiTags,
-  ApiBearerAuth,
-  ApiResponse,
-  ApiCreatedResponse,
-  ApiOkResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { PostResponseDto } from './dto/PostResponse.dto';
 import { UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';

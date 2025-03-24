@@ -14,6 +14,7 @@ import { PostEntity } from '../post-entity/post.entity';
 import { PostLikeEntity } from '../post-entity/postLike.entity';
 import { FriendRequestEntity } from '../friend-entity/friend-request.entity';
 import { FriendListEntity } from '../friend-entity/friend-list.entity';
+import { CommentEntity } from '../comments-entity/comments.entity';
 
 export const DEFAULT_AVATAR_URL =
   'https://microcosmworkspoc.s3.us-east-1.amazonaws.com/c208e193-31f3-4ddc-9f95-65fe209b72f5-da7ed7b0-5f66-4f97-a610-51100d3b9fd2%20%281%29.jpg';
@@ -80,6 +81,9 @@ export class UserEntity {
 
   @OneToMany(() => FriendListEntity, (friendList) => friendList.receiver)
   friends2: FriendListEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.user)
+  comments: CommentEntity[];
 
   // @Column({ default: null, nullable: true })
   // designation: string;

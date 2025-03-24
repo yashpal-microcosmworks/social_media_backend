@@ -9,6 +9,7 @@ import {
 import { UserEntity } from '../user-entity/user.entity';
 import { PostMediaEntity } from './postMedia.entity';
 import { PostLikeEntity } from './postLike.entity';
+import { CommentEntity } from '../comments-entity/comments.entity';
 
 @Entity('posts')
 export class PostEntity {
@@ -23,6 +24,9 @@ export class PostEntity {
 
   @OneToMany(() => PostLikeEntity, (reaction) => reaction.post)
   reactions: PostLikeEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.post)
+  comments: CommentEntity[];
 
   @Column({ type: 'text', nullable: true })
   content: string;

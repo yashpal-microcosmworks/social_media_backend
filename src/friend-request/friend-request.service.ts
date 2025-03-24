@@ -59,7 +59,6 @@ export class FriendRequestService {
           message: 'Friend request canceled successfully',
         };
       }
-
       friendRequest.status = FriendStatus.PENDING;
       friendRequest.isDeleted = false;
       friendRequest.createdAt = new Date();

@@ -20,7 +20,7 @@ export class PostService {
   ) {}
 
   private formatPostResponse(post: any) {
-    const { is_deleted, createdAt, media, reactions, ...rest } = post;
+    const { is_deleted, createdAt, media, reactions, comments, ...rest } = post;
 
     return {
       ...rest,
@@ -32,6 +32,10 @@ export class PostService {
       reactions: reactions
         .filter((reactionItem) => !reactionItem.isDeleted)
         .map(({ isDeleted, createdAt, ...reactionItem }) => reactionItem),
+
+      comments: comments
+        .filter((commentItem) => !commentItem.isDeleted)
+        .map(({ isDeleted, createdAt, ...commentItem }) => commentItem),
     };
   }
 
@@ -84,12 +88,12 @@ export class PostService {
   async getAllPosts(): Promise<PostEntity[]> {
     const posts = await this.postRepository.find({
       where: { is_deleted: false },
-      relations: ['media', 'reactions'],
+      relations: ['media', 'reactions', 'comments'],
     });
 
-    // if (posts.length === 0) {
-    //   throw new NotFoundException('No posts available');
-    // }
+    if (posts.length === 0) {
+      throw new NotFoundException('No posts available');
+    }
 
     return posts.map((post) => this.formatPostResponse(post));
   }

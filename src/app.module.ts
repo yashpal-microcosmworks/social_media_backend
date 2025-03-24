@@ -22,6 +22,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { PostModule } from './post/posts/posts.module';
 import { PostLikeModule } from './post/postLikes/postLikes.module';
 import { FriendRequestModule } from './friend-request/friend-request.module';
+import { CommentModule } from './comments/comment.module';
 @Module({
   imports: [
     NestConfigModule.forRoot({
@@ -48,6 +49,7 @@ import { FriendRequestModule } from './friend-request/friend-request.module';
     PostModule,
     PostLikeModule,
     FriendRequestModule,
+    CommentModule,
   ],
   controllers: [],
   providers: [BootstrapService],

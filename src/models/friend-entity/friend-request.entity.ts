@@ -12,7 +12,7 @@ export enum FriendStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',
-  CANCELED = 'canceled',
+  CANCELED = 'cancelled',
 }
 
 @Entity()
