@@ -185,6 +185,7 @@ export class FriendRequestService {
       return {
         id: friendUser.id,
         name: `${friendUser.firstName} ${friendUser.lastName}`,
+        avatar: `${friendUser.avatar}`,
         friendshipSince: friend.createdAt,
       };
     });

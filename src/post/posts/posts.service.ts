@@ -6,6 +6,7 @@ import { PostMediaEntity } from '../../models/post-entity/postMedia.entity';
 import { PostLikeEntity } from '../../models/post-entity/postLike.entity';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { S3Service } from 'src/third-party/aws/S3_bucket/s3.service';
+import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class PostService {
@@ -21,7 +22,6 @@ export class PostService {
 
   private formatPostResponse(post: any) {
     const { is_deleted, createdAt, media, reactions, comments, ...rest } = post;
-
     return {
       ...rest,
       createdAt,
@@ -31,11 +31,22 @@ export class PostService {
 
       reactions: reactions
         .filter((reactionItem) => !reactionItem.isDeleted)
-        .map(({ isDeleted, createdAt, ...reactionItem }) => reactionItem),
+        .map(({ isDeleted, createdAt, user, ...reactionItem }) => ({
+          ...reactionItem,
+          user: {
+            id: user.id,
+            name: `${user.firstName} ${user.lastName}`,
+          },
+        })),
 
       comments: comments
         .filter((commentItem) => !commentItem.isDeleted)
-        .map(({ isDeleted, createdAt, ...commentItem }) => commentItem),
+        .map(({ isDeleted, createdAt, user, ...commentItem }) => {
+          return {
+            ...commentItem,
+            user: `${user.firstName} ${user.lastName}`,
+          };
+        }),
     };
   }
 
@@ -85,10 +96,16 @@ export class PostService {
     };
   }
 
-  async getAllPosts(): Promise<PostEntity[]> {
+  async getAllPosts(userId): Promise<PostEntity[]> {
     const posts = await this.postRepository.find({
-      where: { is_deleted: false },
-      relations: ['media', 'reactions', 'comments'],
+      where: { user: { id: userId }, is_deleted: false },
+      relations: [
+        'media',
+        'reactions',
+        'reactions.user',
+        'comments',
+        'comments.user',
+      ],
     });
 
     if (posts.length === 0) {
@@ -108,7 +125,8 @@ export class PostService {
       throw new NotFoundException(`Post not found`);
     }
 
-    return this.formatPostResponse(post);
+    // return this.formatPostResponse(post);
+    return post;
   }
 
   async updatePost(

@@ -78,17 +78,19 @@ export class PostLikesService {
     await this.postRepository.save(post);
     const savedLike = await this.postLikeRepository.save(postLike);
 
-    return {
-      message:
-        postLike[reactionType] === 1
-          ? `You reacted with ${reactionType}`
-          : `You removed your ${reactionType} reaction`,
-      likeCount: savedLike.like,
-      loveCount: savedLike.love,
-      hahaCount: savedLike.haha,
-      sadCount: savedLike.sad,
-      angryCount: savedLike.angry,
-      totalReactions: post.totalReactions,
-    };
+    return [
+      {
+        message:
+          postLike[reactionType] === 1
+            ? `You reacted with ${reactionType}`
+            : `You removed your ${reactionType} reaction`,
+        like: savedLike.like,
+        love: savedLike.love,
+        haha: savedLike.haha,
+        sad: savedLike.sad,
+        angry: savedLike.angry,
+        totalReactions: post.totalReactions,
+      },
+    ];
   }
 }

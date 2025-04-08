@@ -53,13 +53,13 @@ export class PostController {
     type: [PostResponseDto], // Assuming PostEntity is your response type
   })
   @Get()
-  async getAllPosts() {
-    return this.postService.getAllPosts();
+  async getAllPosts(@Request() req: any) {
+    return this.postService.getAllPosts(req.user.id);
   }
 
   @Get(':id')
   async getPostById(@Param('id') id: number) {
-    return this.postService.getPostById(id);
+    return this.postService.getPostById(+id);
   }
 
   @Put(':id')

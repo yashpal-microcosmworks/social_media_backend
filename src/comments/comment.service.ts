@@ -10,17 +10,25 @@ export class CommentService {
     private commentRepository: Repository<CommentEntity>,
   ) {}
 
-  async createComment(
-    postId: number,
-    content: string,
-    userId: number,
-  ): Promise<CommentEntity> {
+  async createComment(postId: number, content: string, userId: number) {
     const comment = this.commentRepository.create({
       post: { id: postId },
       content,
       user: { id: userId },
     });
-    return this.commentRepository.save(comment);
+    await this.commentRepository.save(comment);
+
+    const savedComment = await this.commentRepository.findOne({
+      where: { id: comment.id },
+      relations: ['user'],
+      select: ['id', 'content', 'user'], // Selecting required fields
+    });
+
+    return {
+      id: savedComment.id,
+      content: savedComment.content,
+      user: `${savedComment.user.firstName} ${savedComment.user.lastName}`, // Extracting only the user's name
+    };
   }
 
   async getComments(postId: number): Promise<any[]> {
